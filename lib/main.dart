@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'quizz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(Quizzler());
 
+//inheritance
 class Quizzler extends StatelessWidget {
-  @override
+  @override // polymorphism
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
@@ -27,15 +32,36 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
 
-  List<String> questions = [
-    'You can lead a cow down stairs but not up stairs.',
-    'Approximately one quarter of human bones are in the feet.',
-    'A slug\'s blood is green.',
-  ];
+  void checkAnswer(bool userPickedAnswer) {
+    bool correctAnswer = quizBrain.getQuestionAnswer();
 
-  List<bool> answer = [false, true, true];
+    setState(() {
+      if (quizBrain.isFinished() == true) {
+        Alert(
+          context: context,
+          title: 'Finished!',
+          desc: 'You\'ve reached the end of the quiz.',
+        ).show();
 
-  int count = 0;
+        quizBrain.reset();
+
+        scoreKeeper = [];
+      } else {
+        if (userPickedAnswer == correctAnswer) {
+          scoreKeeper.add(Icon(
+            Icons.check,
+            color: Colors.green,
+          ));
+        } else {
+          scoreKeeper.add(Icon(
+            Icons.close,
+            color: Colors.red,
+          ));
+        }
+        quizBrain.nextQuestion();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +75,8 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questions[count],
+                // quizBrain.questionBank[count].questionText = 'vasi', < - it's not safe
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -73,18 +100,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                bool correctAnswer = answer[count];
-                if (correctAnswer == true) {
-                  print('right');
-                } else {
-                  print('wrong');
-                }
-                setState(() {
-                  count++;
-                  // scoreKeeper.add(
-                  //   Icon(Icons.check, color: Colors.green),
-                  // );
-                });
+                checkAnswer(true);
               },
             ),
           ),
@@ -102,21 +118,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                bool correctAnswer = answer[count];
-                if (correctAnswer == true) {
-                  print('right');
-                } else {
-                  print('wrong');
-                }
-                setState(() {
-                  count++;
-                  // scoreKeeper.add(
-                  //   Icon(
-                  //     Icons.close,
-                  //     color: Colors.red,
-                  //   ),
-                  // );
-                });
+                checkAnswer(false);
               },
             ),
           ),
@@ -129,7 +131,3 @@ class _QuizPageState extends State<QuizPage> {
     );
   }
 }
-
-/*
-
-*/
